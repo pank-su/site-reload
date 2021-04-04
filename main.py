@@ -1,3 +1,5 @@
+import json
+
 import numpy as np
 from flask import Flask, render_template, url_for, redirect, request, render_template_string
 from data import db_session
@@ -179,17 +181,34 @@ def task_1():
     if request.method == 'GET':
         return render_template('first_task.html')
     elif request.method == 'POST':
-        first = render_template('first_task_for_edit.html', lines=request.form.get('lines'))
-        param = {}
-        print(request.form.get('1R'))
+        param = []
+        decide = True
+        legs = []
         for i in range(1, int(request.form.get('lines')) + 1):
-            param[f'{i}R'] = str(request.form.get(f'{i}R'))
-            param[f'{i}D'] = str(request.form.get(f'{i}D'))
-            param[f'{i}V'] = str(request.form.get(f'{i}V'))
-        print(param)
-        print(first)
+            param.append({})
+            legs.append([])
+            if request.form.get(f'{i}R') == 0:
+                decide = False
+            legs[i - 1].append(int(request.form.get(f'{i}R')))
+            param[-1]['name'] = f'{i}R'
+            param[-1]['content'] = str(request.form.get(f'{i}R'))
+            param.append({})
+            if request.form.get(f'{i}D') == 'Направление':
+                decide = False
+            legs[i - 1].append(request.form.get(f'{i}D'))
+            param[-1]['name'] = f'{i}D'
+            param[-1]['content'] = str(request.form.get(f'{i}D'))
+            param.append({})
+            if request.form.get(f'{i}V') == 0:
+                decide = False
+            legs[i - 1].append(int(request.form.get(f'{i}V')))
+            param[-1]['name'] = f'{i}V'
+            param[-1]['content'] = str(request.form.get(f'{i}V'))
+        if not decide:
+            return render_template('first_task_for_edit.html', ran=list(range(1, int(request.form.get('lines')) + 1)), elems=param, lines=int(request.form.get('lines')))
+        print(legs)
+        return json.dumps(legs)
 
-        return render_template_string(first, **param)
 
 @app.route('/phys/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):

@@ -107,54 +107,37 @@
     <div class="p-3" id="0">
 
         <input data-prefix="Колличество ветвей" name="lines" type="number" min=2 class="form-control" aria-label=""
-               value=3 onchange="lines_(this.value)">
+               value={{lines}} onchange="lines_(this.value)">
 
     </div>
-<div class="px-3" id="lines">
-    <div class="input-group pb-1" id="1">
-        <input type="number" class="form-control" aria-label="Text input with dropdown button"
-               placeholder="Сопротивление" name="1R">
-        <select class="form-select" aria-label="Default select example" name="1D">
-            <option selected>Направление</option>
-            <option value="L">L</option>
-            <option value="R">R</option>
-        </select>
-        <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Вольтаж" name="1V">
+    <div class="px-3" id="lines">
+        {% for i in ran %}
+            <div class="input-group pb-1" id="{{i}}">
+                <input type="number" class="form-control" aria-label="Text input with dropdown button"
+                    placeholder="Сопротивление" name="{{i}}R" id="{{i}}R">
+                <select class="form-select" aria-label="Default select example" name="{{i}}D" id="{{i}}D">
+                    <option selected>Направление</option>
+                    <option value="L">L</option>
+                    <option value="R">R</option>
+                </select>
+                <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Вольтаж" name="{{i}}V" id="{{i}}V">
+            </div>
+        {% endfor %}
     </div>
-    <div class="input-group pb-1" id="2">
-        <input type="number" class="form-control" aria-label="Text input with dropdown button"
-               placeholder="Сопротивление" name="2R">
-        <select class="form-select" aria-label="Default select example" name="2D">
-            <option selected>Направление</option>
-            <option value="L">L</option>
-            <option value="R">R</option>
-        </select>
-        <input type="number" class="form-control" aria-label="Text input w3th dropdown button" placeholder="Вольтаж" name="2V">
-    </div>
-    <div class="input-group pb-1" id="3">
-        <input type="number" class="form-control" aria-label="Text input with dropdown button"
-               placeholder="Сопротивление" name="3R">
-        <select class="form-select" aria-label="Default select example" name="3D">
-            <option selected>Направление</option>
-            <option value="L">L</option>
-            <option value="R">R</option>
-        </select>
 
-        <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Вольтаж" name="3V">
-    </div>
-</div>
-
-<script>
-    lines_((parseInt("{{lines}}")))
-</script>
 
 <div class="d-flex flex-row-reverse px-3 pb-2" id="4">
 
     <button class="btn btn-outline-primary" type="submit" >Решить</button>
 
 </div>
-
 </form>
+{% for el in elems %}
+    <script>
+        var sel = document.getElementById("{{el['name']}}")
+        sel.value = "{{el['content']}}"
+    </script>
+{% endfor %}
 <!--<div class="accordion px-3" id="accordionExample">-->
 <!--    <div class="accordion-item">-->
 <!--        <h2 class="accordion-header" id="Table_head">-->
