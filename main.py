@@ -172,6 +172,7 @@ def MYKY_method_for_out(legs: list):
     x = np.linalg.solve(a, b)
     yield x
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
@@ -205,24 +206,130 @@ def task_1():
             param[-1]['name'] = f'{i}V'
             param[-1]['content'] = str(request.form.get(f'{i}V'))
         if not decide:
-            return render_template('first_task_for_edit.html', ran=list(range(1, int(request.form.get('lines')) + 1)), elems=param, lines=int(request.form.get('lines')))
+            return render_template('first_task_for_edit.html',
+                                   ran=list(range(1, int(request.form.get('lines')) + 1)),
+                                   elems=param, lines=int(request.form.get('lines')))
         print(legs)
-        return json.dumps(legs)
+        result_dict = {}
+        result = ''
+        MH_gen = MH_method_for_out(legs)
+        for i in range(len(legs)):
+            result += str(i + 1) + '.' + '\n'
+            result += 'R1 = ' + str(next(MH_gen)) + '\n'
+            result += 'Rэ = ' + str(next(MH_gen)) + '\n'
+            result += 'I' + ' = '.join(next(MH_gen)) + ' = ' + next(MH_gen) + '\n'
+            result += 'Uab = ' + str(next(MH_gen)) + '\n'
+            for g in range(len(legs) - 1):
+                result += 'I' + ' = '.join(next(MH_gen)) + ' = ' + next(MH_gen) + '\n'
+        dict_ = next(MH_gen)
+        result += '\n\nTrue currents: \n'
+        for i in range(1, len(legs) + 1):
+            sum_i = ''
+            for index, el in enumerate(dict_[i]):
+                if index == 0:
+                    sum_i += str(el)
+                else:
+                    sum_i += (' - ' if el < 0 else ' + ') + str(abs(el))
+
+            result += 'I{} = {} = {}'.format(str(i), sum_i,
+                                             str(round(float(sum(dict_[i])), 2))) + '\n'
+        result_dict['MH'] = result
+
+        result = ''
+        MYH_gen = MYH_method_for_out(legs)
+        gs = next(MYH_gen)
+        for index, g in enumerate(gs):
+            result += f'  g{index + 1} = 1/{legs[index][0]} = {g} Cм \n'
+        result += f'  Uab = {next(MYH_gen)} \n'
+        for i in range(len(legs)):
+            result += '  ' + next(MYH_gen) + '\n'
+        result_dict['MYH'] = result
+        result = 'Матрица: \n'
+        MYKY_gen = MYKY_method_for_out(legs)
+        for i in range(len(legs)):
+            result += next(MYKY_gen) + '\n'
+        result += '\nСистема: \n'
+        for i in range(len(legs)):
+            result += next(MYKY_gen) + '\n'
+        i = next(MYKY_gen)
+        result += '\n\n'
+        for g in range(len(legs)):
+            result += f'I{g + 1} = ' + str(i[g]) + '\n'
+        result_dict['MYKY'] = result
+        cols = [f'I{i}' for i in range(1, len(legs) + 1)]
+        nl = '\n      '
+        html = f'''
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Метод</th>
+                      {nl.join([f'<th scope="col">{el}</th>' for el in cols])}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">МУН</th>
+                      {nl.join([f'<td>{round(el, 4)}</td>' for el in MYH_method(legs).values()])}
+                    </tr>
+                    <tr>
+                      <th scope="row">MH</th>
+                      {nl.join([f'<td>{round(sum(el), 4)}</td>' for el in MH_method(legs).values()])}
+                    </tr>
+                    <tr>
+                      <th scope="row">МКУ(МУКУ)</th>
+                      {nl.join([f'<td>{round(el, 4)}</td>' for el in MYKY_method(legs)])}
+                    </tr>
+                  </tbody>
+                </table>
+                        '''
+        result_dict['html'] = html
+        new_task = Task()
+        if db_sess.query(Task).first() is None:
+            new_task.id = 1
+        else:
+            new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
+        new_task.subject = 'phys'
+        for el in db_sess.query(Task).all():
+            if el.info == legs:
+                return redirect(f'/phys/task/{el.id}')
+        new_task.info = legs
+        with open(f'static/files/{new_task.id}.json', 'w') as file:
+            file.write(json.dumps(result_dict))
+        new_task.solution_path = f'static/files/{new_task.id}.json'
+        db_sess.add(new_task)
+        db_sess.commit()
+        return redirect(f'/phys/task/{new_task.id}')
 
 
 @app.route('/phys/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
-    print(task_id)
-    return redirect('/phys/task_1')
+    task = db_sess.query(Task).filter(Task.id == task_id).first()
+    legs = task.info
+    param = []
+    for i in range(len(legs)):
+        param.append({})
+        param[-1]['name'] = f'{i + 1}R'
+        param[-1]['content'] = str(legs[i][0])
+        param.append({})
+        param[-1]['name'] = f'{i + 1}D'
+        param[-1]['content'] = str(legs[i][1])
+        param.append({})
+        param[-1]['name'] = f'{i + 1}V'
+        param[-1]['content'] = str(legs[i][2])
+
+    with open(f'static/files/{task.id}.json', 'r') as file:
+        result_dict = json.loads(file.read())
+    return render_template('first_task_solution.html',
+                           ran=list(range(1, len(legs) + 1)),
+                           elems=param, lines=len(legs), file=url_for('static', filename=f'files/{task.id}.json'))
+
 
 @app.route('/')
 def lol():
     return redirect('/phys/task_1')
 
 
-
-
-
 if __name__ == '__main__':
     db_session.global_init("/home/pankov/PycharmProjects/site-reload/data/db/tasks.db")
+    db_sess = db_session.create_session()
     app.run(port=8080, host='127.0.0.1')
