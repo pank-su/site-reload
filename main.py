@@ -1,5 +1,5 @@
 import numpy as np
-from flask import Flask, render_template, url_for, redirect
+from flask import Flask, render_template, url_for, redirect, request, render_template_string
 from data import db_session
 from data.tasks import Task
 
@@ -174,21 +174,34 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
 
-@app.route('/phys/task_1')
+@app.route('/phys/task_1', methods=['GET', 'POST'])
 def task_1():
-    return render_template('first_task.html')
+    if request.method == 'GET':
+        return render_template('first_task.html')
+    elif request.method == 'POST':
+        first = render_template('first_task_for_edit.html', lines=request.form.get('lines'))
+        param = {}
+        print(request.form.get('1R'))
+        for i in range(1, int(request.form.get('lines')) + 1):
+            param[f'{i}R'] = str(request.form.get(f'{i}R'))
+            param[f'{i}D'] = str(request.form.get(f'{i}D'))
+            param[f'{i}V'] = str(request.form.get(f'{i}V'))
+        print(param)
+        print(first)
 
+        return render_template_string(first, **param)
 
 @app.route('/phys/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     print(task_id)
     return redirect('/phys/task_1')
 
+@app.route('/')
+def lol():
+    return redirect('/phys/task_1')
 
-@app.route("/phys/task_1/decide", methods=['POST'])
-def decide():
-    print("Its worked.")
-    return redirect('/phys/task/1')
+
+
 
 
 if __name__ == '__main__':
