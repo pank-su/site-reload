@@ -188,28 +188,36 @@ def task_1():
         for i in range(1, int(request.form.get('lines')) + 1):
             param.append({})
             legs.append([])
-            if request.form.get(f'{i}R') == 0:
+            if request.form.get(f'{i}R') == '':
                 decide = False
-            legs[i - 1].append(int(request.form.get(f'{i}R')))
+            try:
+                legs[i - 1].append(int(request.form.get(f'{i}R')))
+            except ValueError:
+                decide = False
             param[-1]['name'] = f'{i}R'
             param[-1]['content'] = str(request.form.get(f'{i}R'))
             param.append({})
             if request.form.get(f'{i}D') == 'Направление':
                 decide = False
-            legs[i - 1].append(request.form.get(f'{i}D'))
+            try:
+                legs[i - 1].append(request.form.get(f'{i}D'))
+            except ValueError:
+                decide = False
             param[-1]['name'] = f'{i}D'
             param[-1]['content'] = str(request.form.get(f'{i}D'))
             param.append({})
-            if request.form.get(f'{i}V') == 0:
+            if request.form.get(f'{i}V') == '':
                 decide = False
-            legs[i - 1].append(int(request.form.get(f'{i}V')))
+            try:
+                legs[i - 1].append(int(request.form.get(f'{i}V')))
+            except ValueError:
+                decide = False
             param[-1]['name'] = f'{i}V'
             param[-1]['content'] = str(request.form.get(f'{i}V'))
         if not decide:
             return render_template('first_task_for_edit.html',
                                    ran=list(range(1, int(request.form.get('lines')) + 1)),
                                    elems=param, lines=int(request.form.get('lines')))
-        print(legs)
         result_dict = {}
         result = ''
         MH_gen = MH_method_for_out(legs)
@@ -288,40 +296,45 @@ def task_1():
             new_task.id = 1
         else:
             new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
-        new_task.subject = 'phys'
-        for el in db_sess.query(Task).all():
+        new_task.subject = 1
+        for el in db_sess.query(Task).filter((Task.subject == 1) | (Task.type == 1)):
             if el.info == legs:
                 return redirect(f'/phys/task/{el.id}')
         new_task.info = legs
-        with open(f'static/files/{new_task.id}.json', 'w') as file:
+        new_task.type = 1
+        with open(rf'C:\Users\user\PycharmProjects\site-reload\static\files\{new_task.id}.json',
+                  'w') as file:
             file.write(json.dumps(result_dict))
         new_task.solution_path = f'static/files/{new_task.id}.json'
         db_sess.add(new_task)
         db_sess.commit()
-        return redirect(f'/phys/task/{new_task.id}')
+        return redirect(f'/task/{new_task.id}')
 
 
-@app.route('/phys/task/<int:task_id>', methods=['GET'])
+@app.route('/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    legs = task.info
-    param = []
-    for i in range(len(legs)):
-        param.append({})
-        param[-1]['name'] = f'{i + 1}R'
-        param[-1]['content'] = str(legs[i][0])
-        param.append({})
-        param[-1]['name'] = f'{i + 1}D'
-        param[-1]['content'] = str(legs[i][1])
-        param.append({})
-        param[-1]['name'] = f'{i + 1}V'
-        param[-1]['content'] = str(legs[i][2])
+    print(task.subject, task.type)
+    if task.subject == 1 and task.type == 1:
+        legs = task.info
+        param = []
+        for i in range(len(legs)):
+            param.append({})
+            param[-1]['name'] = f'{i + 1}R'
+            param[-1]['content'] = str(legs[i][0])
+            param.append({})
+            param[-1]['name'] = f'{i + 1}D'
+            param[-1]['content'] = str(legs[i][1])
+            param.append({})
+            param[-1]['name'] = f'{i + 1}V'
+            param[-1]['content'] = str(legs[i][2])
 
-    with open(f'static/files/{task.id}.json', 'r') as file:
-        result_dict = json.loads(file.read())
-    return render_template('first_task_solution.html',
-                           ran=list(range(1, len(legs) + 1)),
-                           elems=param, lines=len(legs), file=url_for('static', filename=f'files/{task.id}.json'))
+        # with open(f'static/files/{task.id}.json', 'r') as file:
+        #     result_dict = json.loads(file.read())
+        return render_template('first_task_solution.html',
+                               ran=list(range(1, len(legs) + 1)),
+                               elems=param, lines=len(legs),
+                               file=url_for('static', filename=rf'files/{task.id}.json'))
 
 
 @app.route('/')
@@ -330,6 +343,6 @@ def lol():
 
 
 if __name__ == '__main__':
-    db_session.global_init("/home/pankov/PycharmProjects/site-reload/data/db/tasks.db")
+    db_session.global_init(r"C:\Users\user\PycharmProjects\site-reload\data\db\tasks.db")
     db_sess = db_session.create_session()
     app.run(port=8080, host='127.0.0.1')

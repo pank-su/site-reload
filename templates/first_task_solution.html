@@ -13,7 +13,7 @@
 
     <!-- Bootstrap CSS -->
     <link href="{{ url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet"
-          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+          integrity="" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
     <link rel="icon" href="{{ url_for('static', filename='images/ico2.png')}}" type="image/png">
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.5.1.min.js')}}"></script>
@@ -195,6 +195,12 @@
         </div>
     </div>
 </div>
+<label for="basic-url" class="form-label px-3 pt-3">Your vanity URL</label>
+<div class="input-group px-3 mb-3">
+    <span class="input-group-text" id="basic-addon3">https://phhask.space/t/</span>
+    <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+    <button type="button" class="btn btn-primary">Share</button>
+</div>
 <footer class="py-2 d-flex justify-content-center" id='footer'>
     <a href="https://github.com/Cynep-SU">
         <img src="{{ url_for('static', filename='images/pankoff.png')}}" alt="HTML tutorial" style="width:78px;height:78px;">
@@ -204,7 +210,7 @@
 
 <!-- Option 1: Bootstrap Bundle with Popper -->
 <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}"
-        integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+        integrity=""
         crossorigin="anonymous"></script>
 
 <!-- Option 2: Separate Popper and Bootstrap JS -->
