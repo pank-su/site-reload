@@ -17,3 +17,4 @@ class Task(SqlAlchemyBase):
     solution_path = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
     subject_obj = orm.relation('Subject')
     type_obj = orm.relation('Task_type')
+    tasks = orm.relation("Link", back_populates='task_obj')

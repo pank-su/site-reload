@@ -4,6 +4,7 @@ import numpy as np
 from flask import Flask, render_template, url_for, redirect, request, render_template_string
 from data import db_session
 from data.tasks import Task
+from data.beautiful_links import Link
 
 
 # Решение задачи MH методом и возврат значений токов
@@ -302,7 +303,7 @@ def task_1():
                 return redirect(f'/phys/task/{el.id}')
         new_task.info = legs
         new_task.type = 1
-        with open(rf'C:\Users\user\PycharmProjects\site-reload\static\files\{new_task.id}.json',
+        with open(f'static/files/{new_task.id}.json',
                   'w') as file:
             file.write(json.dumps(result_dict))
         new_task.solution_path = f'static/files/{new_task.id}.json'
@@ -329,12 +330,10 @@ def get_task(task_id):
             param[-1]['name'] = f'{i + 1}V'
             param[-1]['content'] = str(legs[i][2])
 
-        # with open(f'static/files/{task.id}.json', 'r') as file:
-        #     result_dict = json.loads(file.read())
         return render_template('first_task_solution.html',
                                ran=list(range(1, len(legs) + 1)),
-                               elems=param, lines=len(legs),
-                               file=url_for('static', filename=rf'files/{task.id}.json'))
+                               elems=param, lines=len(legs), task_id=task_id, link='',
+                               beauti='false')
 
 
 @app.route('/')
@@ -342,7 +341,60 @@ def lol():
     return redirect('/phys/task_1')
 
 
+@app.route('/get_json_task/<int:task_id>')
+def get_json_task(task_id):
+    with open(f'static/files/{task_id}.json', 'r') as file:
+        return file.read()
+
+
+@app.route('/check_url', methods=['POST'])
+def check_url():
+    link = request.data.decode('utf-8')
+    if len(db_sess.query(Link).filter(Link.link == link).all()) == 1:
+        return 'False'
+    return 'True'
+
+
+@app.route('/add_url', methods=['POST'])
+def add_url():
+    data = request.data.decode('utf-8')
+    new_link = Link()
+    if db_sess.query(Link).first() is None:
+        new_link.id = 1
+    else:
+        new_link.id = db_sess.query(Link).order_by(Link.id.desc()).first().id + 1
+    new_link.link, new_link.task_id = data.split('୪')[0], int(data.split('୪')[1])
+    db_sess.add(new_link)
+    db_sess.commit()
+    return 'ok'
+
+
+@app.route('/t/<string:name>')
+def beauty(name):
+    task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
+    task = db_sess.query(Task).filter(Task.id == task_id).first()
+    print(task.subject, task.type)
+    if task.subject == 1 and task.type == 1:
+        legs = task.info
+        param = []
+        for i in range(len(legs)):
+            param.append({})
+            param[-1]['name'] = f'{i + 1}R'
+            param[-1]['content'] = str(legs[i][0])
+            param.append({})
+            param[-1]['name'] = f'{i + 1}D'
+            param[-1]['content'] = str(legs[i][1])
+            param.append({})
+            param[-1]['name'] = f'{i + 1}V'
+            param[-1]['content'] = str(legs[i][2])
+
+        return render_template('first_task_solution.html',
+                               ran=list(range(1, len(legs) + 1)),
+                               elems=param, lines=len(legs), task_id=task_id, link=name,
+                               beauti='true')
+
+
 if __name__ == '__main__':
-    db_session.global_init(r"C:\Users\user\PycharmProjects\site-reload\data\db\tasks.db")
+    db_session.global_init("data/db/tasks.db")
     db_sess = db_session.create_session()
-    app.run(port=8080, host='127.0.0.1')
+    app.run(port=8080, host='127.0.0.1', debug=1)
