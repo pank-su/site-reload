@@ -1,4 +1,5 @@
 import json
+import os
 
 import numpy as np
 from flask import Flask, render_template, url_for, redirect, request, render_template_string
@@ -402,4 +403,5 @@ def beauty(name):
 if __name__ == '__main__':
     db_session.global_init(r"data/db/tasks.db")
     db_sess = db_session.create_session()
-    app.run(debug=1)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
