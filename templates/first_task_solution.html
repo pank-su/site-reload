@@ -4,10 +4,10 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="PHHask">
-    <meta property="og:site_name" content="PHHask">
+    <meta property="og:title" content="Task {{task_id}}">
+    <meta property="og:site_name" content="Task {{task_id}}">
     <meta property="og:url" content="https://phhask.space/">
-    <meta property="og:description" content="Это сайт для решения однотипных задач по физике.">
+    <meta property="og:description" content="Это решение задачи под номером {{task_id}}">
     <meta property="og:image" content="{{ url_for('static', filename='images/ico2.png')}}">
     <meta name="yandex-verification" content="c3d1bacbc9c1efc0"/>
 
@@ -20,9 +20,9 @@
     <script src="{{ url_for('static', filename='js/bootstrap-input-spinner.js')}}"></script>
 
 
-    <title>PHHask</title>
+    <title>Task {{task_id}}</title>
     <meta name="Description"
-          content="Это сайт для решение однотипных задач по физике, где надо найти токи в нескольких ветвях между двумя узлами."/>
+          content="Это решение задачи под номером {{task_id}}"/>
 
 </head>
 <body>
@@ -243,8 +243,8 @@
     }
     var task_id = {{task_id}};
     var bool = {{beauti}}
-    var bad_url = document.getElementById("bad_url")
-    var good_url = document.getElementById("good_url")
+    const bad_url = document.getElementById("bad_url")
+    const good_url = document.getElementById("good_url")
     if (!bool) {
         document.getElementById("was_url").style.display = 'none'
     } else {
@@ -330,9 +330,8 @@
             bool = true
             document.getElementById('basic-url').value = "{{link}}"
             document.getElementById('basic-url').readOnly = true
-            var bad_url = document.getElementById("bad_url")
-            var good_url = document.getElementById("good_url")
             document.getElementById("was_url").style.display = ''
+            good_url.style.display === 'none'
             console.log(task_id)
             if (navigator.share) {
                 console.log("Congrats! Your browser supports Web Share API")
@@ -341,7 +340,7 @@
                 navigator.share({
                     title: "Задача {{task_id}}",
                     text: "",
-                    url: "https://phhask.space/t/" + input.value
+                    url: ("https://phhask.space/t/" + input.value).toString()
                 })
                     .then(function () {
                         console.log("Shareing successfull")

@@ -5,7 +5,7 @@ from flask import Flask, render_template, url_for, redirect, request, render_tem
 from data import db_session
 from data.tasks import Task
 from data.beautiful_links import Link
-db_session.global_init("data/db/tasks.db")
+db_session.global_init(r"C:\Users\user\PycharmProjects\site-reload\data\db\tasks.db")
 db_sess = db_session.create_session()
 
 # Решение задачи MH методом и возврат значений токов
@@ -304,10 +304,9 @@ def task_1():
                 return redirect(f'/phys/task/{el.id}')
         new_task.info = legs
         new_task.type = 1
-        with open(f'static/files/{new_task.id}.json',
-                  'w') as file:
+        with open(fr'C:\Users\user\PycharmProjects\site-reload\static\files\{new_task.id}.json','w') as file:
             file.write(json.dumps(result_dict))
-        new_task.solution_path = f'static/files/{new_task.id}.json'
+        new_task.solution_path = fr'static\files\{new_task.id}.json'
         db_sess.add(new_task)
         db_sess.commit()
         return redirect(f'/task/{new_task.id}')
@@ -350,7 +349,7 @@ def lol():
 
 @app.route('/get_json_task/<int:task_id>')
 def get_json_task(task_id):
-    with open(f'static/files/{task_id}.json', 'r') as file:
+    with open(rf'C:\Users\user\PycharmProjects\site-reload\static\files\{task_id}.json', 'r') as file:
         return file.read()
 
 
@@ -402,4 +401,4 @@ def beauty(name):
 
 
 # if __name__ == '__main__':
-#     app.run(port=8080, host='127.0.0.1', debug=1)
+app.run(debug=1)
