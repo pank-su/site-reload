@@ -5,8 +5,7 @@ from flask import Flask, render_template, url_for, redirect, request, render_tem
 from data import db_session
 from data.tasks import Task
 from data.beautiful_links import Link
-db_session.global_init(r"data/db/tasks.db")
-db_sess = db_session.create_session()
+
 
 # Решение задачи MH методом и возврат значений токов
 def MH_method(legs: list) -> dict:
@@ -400,5 +399,7 @@ def beauty(name):
                                beauti='true')
 
 
-# if __name__ == '__main__':
-app.run(debug=1)
+if __name__ == '__main__':
+    db_session.global_init(r"data/db/tasks.db")
+    db_sess = db_session.create_session()
+    app.run(debug=1)
