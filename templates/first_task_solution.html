@@ -241,17 +241,8 @@
     if (!navigator.share) {
         document.getElementById('share-button').innerText = 'Copy'
     }
-    var task_id = {
-    {
-        task_id
-    }
-    }
-    ;
-    var bool = {
-    {
-        beauti
-    }
-    }
+    var task_id = {{task_id}};
+    var bool = {{beauti}}
     var bad_url = document.getElementById("bad_url")
     var good_url = document.getElementById("good_url")
     if (!bool) {
@@ -336,6 +327,12 @@
         if (good_url.style.display === '' || bool) {
             xhr.open('POST', '/add_url', false)
             xhr.send(input.value + "୪" + task_id)
+            bool = true
+            document.getElementById('basic-url').value = "{{link}}"
+            document.getElementById('basic-url').readOnly = true
+            var bad_url = document.getElementById("bad_url")
+            var good_url = document.getElementById("good_url")
+            document.getElementById("was_url").style.display = ''
             console.log(task_id)
             if (navigator.share) {
                 console.log("Congrats! Your browser supports Web Share API")
