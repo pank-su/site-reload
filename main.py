@@ -4,7 +4,7 @@ import os
 import numpy as np
 import sympy
 from flask import Flask, render_template, redirect, request, send_file
-from sympy import Poly, solve
+from sympy import Poly, solve, oo
 from sympy.abc import x
 
 from data import db_session
@@ -257,6 +257,7 @@ def math_task_1():
             result += '$$' + '\hspace{3pt}'.join(list(findExtremums(f, x))) + '$$'
         except Exception:
             result += '$$-$$\n'
+        result += r'$$ \lim_{x \to \infty} ' + sympy.latex(f) + ' = ' + sympy.latex(sympy.limit(f, x, oo)) + '$$'
         new_task = Task()
         if db_sess.query(Task).first() is None:
             new_task.id = 1
@@ -271,7 +272,7 @@ def math_task_1():
         with open(fr'static/files/{new_task.id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
         new_task.solution_path = fr'static/files/{new_task.id}.json'
-        graph = sympy.plot(f, show=False)
+        graph = sympy.plot(f, show=False, addaptive=False, nb_of_points=400)
         graph.save(f'static/images/{new_task.id}.png')
         db_sess.add(new_task)
         db_sess.commit()

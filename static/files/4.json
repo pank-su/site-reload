@@ -1,1 +1,1 @@
-{"result": "$$1) D{f} = \\mathbb{R}$$\n$$2) K{f} = \\left[ -1 - i, \\  -1 + i\\right]$$\n$$3) f'(x) = - 2 x - 2$$\n$$\\left[ \\left(-\\infty, -1\\right), \\  \\left(-1, \\infty\\right)\\right]$$\n$$+\\hspace{33pt}-$$\n$$\\uparrow\\hspace{0pt}\\downarrow$$$$max = (-1, -1)$$"}
+{"result": "$$1) D{f} = \\left[0, \\infty\\right)$$\n$$2) K{f} = \\left[ 0\\right]$$\n$$3) f'(x) = \\frac{1}{\\sqrt{x}}$$\n$$-$$\n"}
