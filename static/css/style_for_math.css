@@ -1,0 +1,10 @@
+.center-block {
+    margin-left:auto;
+    margin-right:auto;
+    display:block;
+}
+
+body{
+    max-width: 570px;
+    margin: auto;
+}

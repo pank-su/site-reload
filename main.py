@@ -2,10 +2,14 @@ import json
 import os
 
 import numpy as np
-from flask import Flask, render_template, url_for, redirect, request, render_template_string
+import sympy
+from flask import Flask, render_template, redirect, request, send_file
+from sympy import Poly, solve
+from sympy.abc import x
+
 from data import db_session
-from data.tasks import Task
 from data.beautiful_links import Link
+from data.tasks import Task
 
 
 # Решение задачи MH методом и возврат значений токов
@@ -179,6 +183,106 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
 
+def getDeepDotQuality(func, arg, val, n = 3):
+    dy = func.diff(arg)
+    dyn = dy.subs(arg, val)
+    if (dyn == 0):
+        return getDeepDotQuality(dy, arg, val, n+1)
+    elif (n % 2 == 1):
+        return 'has an inflection point'
+    elif (dyn > 0):
+        return 'min'
+    else:
+        return 'max'
+    return 'aaaaaa'
+
+
+def getDotQuality(func, arg, val):
+    dy = func.subs(arg, val)
+    if (dy > 0):
+        return 'min'
+    elif (dy < 0):
+        return 'max'
+    else:
+        return getDeepDotQuality(func, arg, val)
+
+
+def findExtremums(func, arg):
+    dy = func.diff(arg)
+    ddy = dy.diff(arg)
+    extremums = solve(dy, arg)
+
+    for val in extremums:
+        yield '{} = ({}, {})'.format(getDotQuality(ddy, arg, val), val, func.subs(x, val))
+
+
+
+
+@app.route('/math/task_1', methods=['GET', 'POST'])
+def math_task_1():
+    if request.method == 'GET':
+        return render_template('second_task.html')
+    elif request.method == 'POST':
+        result = '$$1) D{f} = '
+        x = sympy.Symbol("x")
+        R = sympy.S.Reals
+        f = sympy.parse_expr(request.form.get('line'))
+        result += sympy.latex(sympy.calculus.util.continuous_domain(f, x, R)) + '$$\n'
+        result += '$$2) K{f} = ' + sympy.latex(sympy.solve(f)) + '$$\n'
+        result += "$$3) f'(x) = " + sympy.latex(sympy.diff(f)) + '$$\n'
+        print(f)
+
+        try:
+            result_ = []
+            result_2 = []
+            some = sympy.solvers.inequalities.solve_poly_inequality(Poly(sympy.diff(f), x, domain='ZZ'),
+                                                             '!=')
+            some_minus = sympy.solvers.inequalities.solve_poly_inequality(
+                Poly(sympy.diff(f), x, domain='ZZ'),
+                '<')
+            some_plus = sympy.solvers.inequalities.solve_poly_inequality(
+                Poly(sympy.diff(f), x, domain='ZZ'),
+                '>')
+            for el in some:
+                if el in some_minus:
+                    result_.append('-')
+                    result_2.append(r'\downarrow')
+                elif el in some_plus:
+                    result_.append('+')
+                    result_2.append(r'\uparrow')
+            print(result_)
+            result += '$$' + sympy.latex(some) + '$$\n'
+            result += '$$' + '\hspace{33pt}'.join(result_) + '$$\n'
+            result += '$$' + '\hspace{0pt}'.join(result_2) + '$$'
+            result += '$$' + '\hspace{3pt}'.join(list(findExtremums(f, x))) + '$$'
+        except Exception:
+            result += '$$-$$\n'
+        new_task = Task()
+        if db_sess.query(Task).first() is None:
+            new_task.id = 1
+        else:
+            new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
+        for el in db_sess.query(Task).filter(Task.type == 2):
+            if el.info == [str(f)]:
+                return redirect(f'/task/{el.id}')
+        new_task.info = [str(f)]
+        new_task.type = 2
+        result_dict = {'result': result}
+        with open(fr'static/files/{new_task.id}.json', 'w') as file:
+            file.write(json.dumps(result_dict))
+        new_task.solution_path = fr'static/files/{new_task.id}.json'
+        graph = sympy.plot(f, show=False)
+        graph.save(f'static/images/{new_task.id}.png')
+        db_sess.add(new_task)
+        db_sess.commit()
+        return redirect(f'/task/{new_task.id}')
+        # return render_template('second_task_solution.html', solution=result)
+
+@app.route('/get_image/<int:task_id>')
+def get_image(task_id):
+    return send_file(f'static/images/{task_id}.png', mimetype='image/gif')
+
+
 @app.route('/phys/task_1', methods=['GET', 'POST'])
 def task_1():
     if request.method == 'GET':
@@ -298,13 +402,12 @@ def task_1():
             new_task.id = 1
         else:
             new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
-        new_task.subject = 1
-        for el in db_sess.query(Task).filter((Task.subject == 1) | (Task.type == 1)):
+        for el in db_sess.query(Task).filter(Task.type == 1):
             if el.info == legs:
-                return redirect(f'/phys/task/{el.id}')
+                return redirect(f'/task/{el.id}')
         new_task.info = legs
         new_task.type = 1
-        with open(fr'static/files/{new_task.id}.json','w') as file:
+        with open(fr'static/files/{new_task.id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
         new_task.solution_path = fr'static/files/{new_task.id}.json'
         db_sess.add(new_task)
@@ -315,8 +418,7 @@ def task_1():
 @app.route('/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    print(task.subject, task.type)
-    if task.subject == 1 and task.type == 1:
+    if task.type == 1:
         legs = task.info
         param = []
         for i in range(len(legs)):
@@ -333,13 +435,19 @@ def get_task(task_id):
         if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
             return render_template('first_task_solution.html',
                                    ran=list(range(1, len(legs) + 1)),
-                                   elems=param, lines=len(legs), task_id=task_id, link=db_sess.query(Link).filter(Link.task_id == task_id).first().link,
+                                   elems=param, lines=len(legs), task_id=task_id,
+                                   link=db_sess.query(Link).filter(
+                                       Link.task_id == task_id).first().link,
                                    beauti='true')
 
         return render_template('first_task_solution.html',
                                ran=list(range(1, len(legs) + 1)),
                                elems=param, lines=len(legs), task_id=task_id, link='',
                                beauti='false')
+    elif task.type == 2:
+        with open(f'static/files/{task_id}.json', 'r') as file:
+            dict_ = json.loads(file.read())
+        return render_template('second_task_solution.html', line=task.info[0], solution=dict_['result'], task_id=task_id)
 
 
 @app.route('/')
@@ -379,8 +487,8 @@ def add_url():
 def beauty(name):
     task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
     task = db_sess.query(Task).filter(Task.id == task_id).first()
-    print(task.subject, task.type)
-    if task.subject == 1 and task.type == 1:
+    print(task.type)
+    if task.type == 1:
         legs = task.info
         param = []
         for i in range(len(legs)):
@@ -398,6 +506,7 @@ def beauty(name):
                                ran=list(range(1, len(legs) + 1)),
                                elems=param, lines=len(legs), task_id=task_id, link=name,
                                beauti='true')
+
 
 
 if __name__ == '__main__':

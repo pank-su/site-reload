@@ -9,12 +9,12 @@ class Task(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    subject = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("subjects.id"),
-                                nullable=False)
+    # subject = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("subjects.id"),
+    #                             nullable=False)
     type = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("task_types.id"),
                              nullable=False)
     info = sqlalchemy.Column(sqlalchemy.JSON, nullable=False, unique=True)
     solution_path = sqlalchemy.Column(sqlalchemy.String, nullable=False, unique=True)
-    subject_obj = orm.relation('Subject')
+    # subject_obj = orm.relation('Subject')
     type_obj = orm.relation('Task_type')
     tasks = orm.relation("Link", back_populates='task_obj')
