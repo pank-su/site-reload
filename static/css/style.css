@@ -9,3 +9,8 @@ input::-webkit-inner-spin-button {
     margin-right:auto;
     display:block;
 }
+
+body{
+    max-width: 570px;
+    margin: auto;
+}

@@ -328,10 +328,9 @@
             xhr.open('POST', '/add_url', false)
             xhr.send(input.value + "୪" + task_id)
             bool = true
-            document.getElementById('basic-url').value = "{{link}}"
             document.getElementById('basic-url').readOnly = true
             document.getElementById("was_url").style.display = ''
-            good_url.style.display === 'none'
+            document.getElementById("good_url").style.display = 'none'
             console.log(task_id)
             if (navigator.share) {
                 console.log("Congrats! Your browser supports Web Share API")
