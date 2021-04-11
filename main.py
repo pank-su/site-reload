@@ -404,4 +404,4 @@ if __name__ == '__main__':
     db_session.global_init(r"data/db/tasks.db")
     db_sess = db_session.create_session()
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=port)
