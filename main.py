@@ -233,15 +233,16 @@ def math_task_1():
         print(f)
 
         try:
+            dif = sympy.diff(f)
             result_ = []
             result_2 = []
-            some = sympy.solvers.inequalities.solve_poly_inequality(Poly(sympy.diff(f), x, domain='ZZ'),
+            some = sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
                                                              '!=')
             some_minus = sympy.solvers.inequalities.solve_poly_inequality(
-                Poly(sympy.diff(f), x, domain='ZZ'),
+                Poly(dif, x, domain='ZZ'),
                 '<')
             some_plus = sympy.solvers.inequalities.solve_poly_inequality(
-                Poly(sympy.diff(f), x, domain='ZZ'),
+                Poly(dif, x, domain='ZZ'),
                 '>')
             for el in some:
                 if el in some_minus:
@@ -253,11 +254,38 @@ def math_task_1():
             print(result_)
             result += '$$' + sympy.latex(some) + '$$\n'
             result += '$$' + '\hspace{33pt}'.join(result_) + '$$\n'
-            result += '$$' + '\hspace{0pt}'.join(result_2) + '$$'
+            result += '$$' + '\hspace{33pt}'.join(result_2) + '$$'
             result += '$$' + '\hspace{3pt}'.join(list(findExtremums(f, x))) + '$$'
         except Exception:
             result += '$$-$$\n'
         result += r'$$ \lim_{x \to \infty} ' + sympy.latex(f) + ' = ' + sympy.latex(sympy.limit(f, x, oo)) + '$$'
+        try:
+            dif = sympy.diff(sympy.diff(f))
+            result_ = []
+            result_2 = []
+            some = sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
+                                                             '!=')
+            some_minus = sympy.solvers.inequalities.solve_poly_inequality(
+                Poly(dif, x, domain='ZZ'),
+                '<')
+            some_plus = sympy.solvers.inequalities.solve_poly_inequality(
+                Poly(dif, x, domain='ZZ'),
+                '>')
+            for el in some:
+                if el in some_minus:
+                    result_.append('-')
+                    result_2.append(r'\frown')
+                elif el in some_plus:
+                    result_.append('+')
+                    result_2.append(r'\smile')
+            print(result_)
+            result += '$$' + sympy.latex(some) + '$$\n'
+            result += '$$' + '\hspace{33pt}'.join(result_) + '$$\n'
+            result += '$$' + '\hspace{27pt}'.join(result_2) + '$$'
+            result += '$$' + sympy.latex(sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
+                                                             '==')) + '$$'
+        except Exception:
+            result += '$$-$$\n'
         new_task = Task()
         if db_sess.query(Task).first() is None:
             new_task.id = 1
