@@ -531,8 +531,6 @@ def add_url():
 @app.route('/t/<string:name>')
 def beauty(name):
     task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
-    task = db_sess.query(Task).filter(Task.id == task_id).first()
-    print(task.type)
     return get_task(task_id)
 
 
