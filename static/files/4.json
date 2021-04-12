@@ -1,1 +1,1 @@
-{"result": "$$1) D{f} = \\left[0, \\infty\\right)$$\n$$2) K{f} = \\left[ 0\\right]$$\n$$3) f'(x) = \\frac{1}{\\sqrt{x}}$$\n$$-$$\n"}
+{"result": "$$1) D{f} = \\mathbb{R}$$\n$$2) K{f} = \\left[ 5\\right]$$\n$$3) f'(x) = -2$$\n$$\\left[ \\mathbb{R}\\right]$$\n$$-$$\n$$\\downarrow$$$$$$$$4) \\lim_{x \\to \\infty} 10 - 2 x = -\\infty$$$$5) f''(x) = 0$$$$\\left[ \\emptyset\\right]$$\n$$-$$\n$$\\frown$$$$\\left[ \\mathbb{R}\\right]$$"}
