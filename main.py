@@ -262,7 +262,7 @@ def math_task_1():
             result += '$$' + '\hspace{33pt}'.join(result_) + '$$\n'
             result += '$$' + '\hspace{33pt}'.join(result_2) + '$$'
             result += '$$' + '\hspace{3pt}'.join(list(findExtremums(f, x))) + '$$'
-        except ValueError:
+        except Exception:
             result += '$$-$$\n'
         result += r'$$4) \lim_{x \to \infty} ' + sympy.latex(f) + ' = ' + sympy.latex(sympy.limit(f, x, oo)) + '$$'
         try:
@@ -534,24 +534,6 @@ def beauty(name):
     task = db_sess.query(Task).filter(Task.id == task_id).first()
     print(task.type)
     return get_task(task_id)
-    # if task.type == 1:
-    #     legs = task.info
-    #     param = []
-    #     for i in range(len(legs)):
-    #         param.append({})
-    #         param[-1]['name'] = f'{i + 1}R'
-    #         param[-1]['content'] = str(legs[i][0])
-    #         param.append({})
-    #         param[-1]['name'] = f'{i + 1}D'
-    #         param[-1]['content'] = str(legs[i][1])
-    #         param.append({})
-    #         param[-1]['name'] = f'{i + 1}V'
-    #         param[-1]['content'] = str(legs[i][2])
-    #
-    #     return render_template('first_task_solution.html',
-    #                            ran=list(range(1, len(legs) + 1)),
-    #                            elems=param, lines=len(legs), task_id=task_id, link=name,
-    #                            beauti='true')
 
 
 
