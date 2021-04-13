@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вы в меню</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet"
+          integrity="" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_for_menu.css')}}">
+    <link rel="icon" href="{{ url_for('static', filename='images/pankoff.png')}}" type="image/png">
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.5.1.min.js')}}"></script>
+</head>
+<body>
+    <div class="d-flex justify-content-around align-items-stretch">
+        <div class="element" id="0">
+            <a href="/phys/task_1" class="el" id="0_0">
+                <img src="{{ url_for('static', filename='images/ico2.png')}}" alt="HTML tutorial" style="width:78px;height:78px;">
+            </a>
+        </div>
+        <div class="border-start">
+
+        </div>
+        <div class="element" id="1">
+            <a href="/math/task_1" class="el" id="1_1">
+                <img src="{{ url_for('static', filename='images/math.png')}}" alt="HTML tutorial" style="width:78px;height:78px;">
+            </a>
+        </div>
+    </div>
+<!--    <footer class="py-2 d-flex justify-content-center" id='footer'>-->
+<!--        <a href="https://github.com/Cynep-SU">-->
+<!--            <img src="images/pankoff.png" alt="HTML tutorial" style="width:78px;height:78px;">-->
+<!--        </a>-->
+<!--    </footer>-->
+</body>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}"
+        integrity=""
+        crossorigin="anonymous"></script>
+<script>
+    $('#0_0').hover(
+        function (){document.getElementById("0").style.backgroundColor = "#DE7E32"},
+        function (){document.getElementById("0").style.backgroundColor = "white"}
+    )
+    $('#1_1').hover(
+        function (){document.getElementById("1").style.backgroundColor = "blue"},
+        function (){document.getElementById("1").style.backgroundColor = "white"}
+    )
+</script>
+</html>

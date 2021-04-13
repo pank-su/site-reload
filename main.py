@@ -494,10 +494,10 @@ def get_task(task_id):
                                beauti='false')
 
 
-
+@app.route('/index')
 @app.route('/')
 def lol():
-    return redirect('/phys/task_1')
+    return render_template('menu.html')
 
 
 @app.route('/get_json_task/<int:task_id>')

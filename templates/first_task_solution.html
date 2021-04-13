@@ -323,7 +323,7 @@
                 navigator.share({
                     title: "Задача {{task_id}}",
                     text: "",
-                    url: ("https://phhask.space/t/" + input.value).toString()
+                    url: ("http://phhask.space/t/" + input.value).toString()
                 })
                     .then(function () {
                         console.log("Shareing successfull")
@@ -334,7 +334,7 @@
 
             } else {
                 let save_value = input.value
-                input.value = "https://www.phhask.space/t/" + input.value
+                input.value = "http://www.phhask.space/t/" + input.value
                 input.select()
                 input.setSelectionRange(0, 99999)
                 document.execCommand("copy")
