@@ -8,10 +8,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: var(--c);
+    background-color: white;
     -webkit-transition: background-color 5s;
     transition: background-color 5s;
-    --c:white;
 }
 
 /*.el:hover{--c:blue;}*/
