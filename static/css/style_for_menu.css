@@ -9,8 +9,8 @@
     align-items: center;
     justify-content: center;
     background-color: var(--c);
-    -webkit-transition: background-color 10s;
-    transition: background-color 10s;
+    -webkit-transition: background-color 5s;
+    transition: background-color 5s;
     --c:white;
 }
 
