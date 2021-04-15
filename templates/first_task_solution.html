@@ -77,7 +77,7 @@
             document.getElementById("lines").innerHTML = ''
             num += 1
             for (let g = 1; g < num; g++) {
-                document.getElementById("lines").insertAdjacentHTML("beforeend", '<div class="input-group pb-1" id="' + g.toString() + '"> <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Сопротивление"> <select class="form-select" aria-label="Default select example"> <option selected>Направление</option> <option value="L">L</option> <option value="R">R</option> </select> <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Вольтаж"> </div>');
+                document.getElementById("lines").insertAdjacentHTML("beforeend", '<div class="input-group pb-1" id="' + g.toString() + '"> <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Сопротивление" name="' + g.toString() + 'R"> <select class="form-select" aria-label="Default select example" name="' + g.toString() + 'D"> <option selected>Направление</option> <option value="L">L</option> <option value="R">R</option> </select> <input type="number" class="form-control" aria-label="Text input with dropdown button" placeholder="Вольтаж" name="' + g.toString() + 'V"> </div>');
             }
             let lines_num = document.forms[0].elements.lines.value
             for (let i = 1; i < lines_num + 1; i++) {
