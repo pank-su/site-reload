@@ -218,7 +218,7 @@
         У этой задачи уже есть ссылка.
     </div>
 </div>
-
+<button type="button" class="btn btn-outline-info px-3 py-1" onclick='document.location.replace("/")'>Вернутся на главный экран</button>
 <footer class="py-2 d-flex justify-content-center" id='footer'>
     <a href="https://github.com/Cynep-SU">
         <img src="{{ url_for('static', filename='images/pankoff.png')}}" alt="HTML tutorial"
@@ -238,6 +238,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pQQkAEnwaBkjpqZ8RU1fF1AKtTcHJwFl3pblpTlHXybJjHpMYo79HY3hIi4NKxyj" crossorigin="anonymous"></script>
 -->
 </body>
+
 <script>
     if (!navigator.share) {
         document.getElementById('share-button').innerText = 'Copy'
