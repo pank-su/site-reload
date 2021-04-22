@@ -183,6 +183,7 @@ def MYKY_method_for_out(legs: list):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
+
 # функции вычисления экстремума
 def getDeepDotQuality(func, arg, val, n=3):
     dy = func.diff(arg)
