@@ -183,12 +183,12 @@ def MYKY_method_for_out(legs: list):
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
-
-def getDeepDotQuality(func, arg, val, n = 3):
+# функции вычисления экстремума
+def getDeepDotQuality(func, arg, val, n=3):
     dy = func.diff(arg)
     dyn = dy.subs(arg, val)
     if (dyn == 0):
-        return getDeepDotQuality(dy, arg, val, n+1)
+        return getDeepDotQuality(dy, arg, val, n + 1)
     elif (n % 2 == 1):
         return 'has an inflection point'
     elif (dyn > 0):
@@ -222,17 +222,18 @@ def findExtremums(func, arg):
         yield '{} = ({}, {})'.format(getDotQuality(ddy, arg, val), val, func.subs(x, val))
 
 
-
-
 @app.route('/math/task_1', methods=['GET', 'POST'])
 def math_task_1():
     if request.method == 'GET':
-        return render_template('second_task.html')
+        return render_template('second_task.html', value='')
     elif request.method == 'POST':
         result = '$$1) D{f} = '
         x = sympy.Symbol("x")
         R = sympy.S.Reals
-        f = sympy.parse_expr(request.form.get('line'))
+        try:
+            f = sympy.parse_expr(request.form.get('line'))
+        except Exception:
+            return render_template('second_task.html', value=request.form.get('line'))
         result += sympy.latex(sympy.calculus.util.continuous_domain(f, x, R)) + '$$\n'
         result += '$$2) K{f} = ' + sympy.latex(sympy.solve(f)) + '$$\n'
         result += "$$3) f'(x) = " + sympy.latex(sympy.diff(f)) + '$$\n'
@@ -243,7 +244,7 @@ def math_task_1():
             result_ = []
             result_2 = []
             some = sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
-                                                             '!=')
+                                                                    '!=')
             some_minus = sympy.solvers.inequalities.solve_poly_inequality(
                 Poly(dif, x, domain='ZZ'),
                 '<')
@@ -264,14 +265,15 @@ def math_task_1():
             result += '$$' + '\hspace{3pt}'.join(list(findExtremums(f, x))) + '$$'
         except Exception:
             result += '$$-$$\n'
-        result += r'$$4) \lim_{x \to \infty} ' + sympy.latex(f) + ' = ' + sympy.latex(sympy.limit(f, x, oo)) + '$$'
+        result += r'$$4) \lim_{x \to \infty} ' + sympy.latex(f) + ' = ' + sympy.latex(
+            sympy.limit(f, x, oo)) + '$$'
         try:
             dif = sympy.diff(sympy.diff(f))
             result += "$$5) f''(x) = " + sympy.latex(dif) + '$$'
             result_ = []
             result_2 = []
             some = sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
-                                                             '!=')
+                                                                    '!=')
             some_minus = sympy.solvers.inequalities.solve_poly_inequality(
                 Poly(dif, x, domain='ZZ'),
                 '<')
@@ -289,8 +291,9 @@ def math_task_1():
             result += '$$' + sympy.latex(some) + '$$\n'
             result += '$$' + '\hspace{33pt}'.join(result_) + '$$\n'
             result += '$$' + '\hspace{27pt}'.join(result_2) + '$$'
-            result += '$$' + sympy.latex(sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
-                                                             '==')) + '$$'
+            result += '$$' + sympy.latex(
+                sympy.solvers.inequalities.solve_poly_inequality(Poly(dif, x, domain='ZZ'),
+                                                                 '==')) + '$$'
         except Exception:
             result += '$$-$$\n'
         new_task = Task()
@@ -316,6 +319,7 @@ def math_task_1():
         db_sess.commit()
         return redirect(f'/task/{new_task.id}')
         # return render_template('second_task_solution.html', solution=result)
+
 
 @app.route('/get_image/<int:task_id>')
 def get_image(task_id):
@@ -488,9 +492,11 @@ def get_task(task_id):
             dict_ = json.loads(file.read())
         if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
             return render_template('second_task_solution.html', line=task.info[0],
-                                   solution=dict_['result'], task_id=task_id, beauti='true', link=db_sess.query(Link).filter(
+                                   solution=dict_['result'], task_id=task_id, beauti='true',
+                                   link=db_sess.query(Link).filter(
                                        Link.task_id == task_id).first().link)
-        return render_template('second_task_solution.html', line=task.info[0], solution=dict_['result'], task_id=task_id, link='',
+        return render_template('second_task_solution.html', line=task.info[0],
+                               solution=dict_['result'], task_id=task_id, link='',
                                beauti='false')
 
 
@@ -532,8 +538,6 @@ def add_url():
 def beauty(name):
     task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
     return get_task(task_id)
-
-
 
 
 if __name__ == '__main__':

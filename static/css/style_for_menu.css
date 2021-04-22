@@ -2,7 +2,7 @@
     height: 78px;
 }
 .element {
-    height: 52.5em;
+    height: 58.5em;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -17,7 +17,7 @@
 
 /*.element:hover{background-color: #25cff2;}*/
 .border-start{
-    height: 52em;
+    height: 58em;
     display: flex;
     justify-content: center;
 }
