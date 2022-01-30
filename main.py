@@ -8,9 +8,10 @@ from flask import Flask, render_template, redirect, request, send_file
 from sympy import Poly, solve, oo
 from sympy.abc import x
 
-from data import db_session
-from data.beautiful_links import Link
 from data.tasks import Task
+
+from help_functions import get_db
+
 
 
 # Решение задачи MH методом и возврат значений токов
@@ -441,6 +442,8 @@ def task_1():
                 </table>
                         '''
         result_dict['html'] = html
+
+'''
         new_task = Task()
         if db_sess.query(Task).first() is None:
             new_task.id = 1
@@ -456,12 +459,33 @@ def task_1():
         new_task.solution_path = fr'static/files/{new_task.id}.json'
         db_sess.add(new_task)
         db_sess.commit()
+'''
+
+        
+
+        new_task = Task()
+        # Запрос из db
+        for el in db_sess["tasks"].find({"type": "1"}):
+            if el["info"] == legs:
+                return redirect(f'/task/{el["id"]}')
+
+        new_task.info = legs
+        new_task.type = 1
+        with open(fr'static/files/{new_task.id}.json', 'w') as file:
+            file.write(json.dumps(result_dict))
+        new_task.solution_path = fr'static/files/{new_task.id}.json'
+
+        db_sess["tasks"].insert_one(new_task.asdict())
+        
+
+
         return redirect(f'/task/{new_task.id}')
 
 
 @app.route('/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
-    task = db_sess.query(Task).filter(Task.id == task_id).first()
+    #task = db_sess.query(Task).filter(Task.id == task_id).first()
+    task = Task(db_sess["tasks"].find({"id": task_id}))
     if task.type == 1:
         legs = task.info
         param = []
@@ -476,12 +500,12 @@ def get_task(task_id):
             param[-1]['name'] = f'{i + 1}V'
             param[-1]['content'] = str(legs[i][2])
 
-        if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
+        #if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
+        if len(db_sess["links"].find({"id": task_id}).distinct("id")) == 1:
             return render_template('first_task_solution.html',
                                    ran=list(range(1, len(legs) + 1)),
                                    elems=param, lines=len(legs), task_id=task_id,
-                                   link=db_sess.query(Link).filter(
-                                       Link.task_id == task_id).first().link,
+                                   link=db_sess["links"].find_one({"id": task_id})["link"],
                                    beauti='true')
 
         return render_template('first_task_solution.html',
@@ -491,11 +515,11 @@ def get_task(task_id):
     elif task.type == 2:
         with open(f'static/files/{task_id}.json', 'r') as file:
             dict_ = json.loads(file.read())
-        if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
+        if len(db_sess["links"].find({"id": task_id}).distinct("id")) == 1:
             return render_template('second_task_solution.html', line=task.info[0],
                                    solution=dict_['result'], task_id=task_id, beauti='true',
-                                   link=db_sess.query(Link).filter(
-                                       Link.task_id == task_id).first().link)
+                                   link=db_sess["links"].find_one({"id": task_id})["link"])
+
         return render_template('second_task_solution.html', line=task.info[0],
                                solution=dict_['result'], task_id=task_id, link='',
                                beauti='false')
@@ -516,7 +540,7 @@ def get_json_task(task_id):
 @app.route('/check_url', methods=['POST'])
 def check_url():
     link = request.data.decode('utf-8')
-    if len(db_sess.query(Link).filter(Link.link == link).all()) == 1:
+    if len(db_sess["links"].find({"link": link}).distinct("link")) == 1:
         return 'False'
     return 'True'
 
@@ -525,24 +549,30 @@ def check_url():
 def add_url():
     data = request.data.decode('utf-8')
     new_link = Link()
-    if db_sess.query(Link).first() is None:
+    if db_sess["links"].find_one() is None:
         new_link.id = 1
     else:
-        new_link.id = db_sess.query(Link).order_by(Link.id.desc()).first().id + 1
+        #new_link.id = db_sess.query(Link).order_by(Link.id.desc()).first().id + 1
+        new_link.id = db_sess["links"].find_one().sort(["id", pymongo.DESCENDING])
+
     new_link.link, new_link.task_id = data.split('୪')[0], int(data.split('୪')[1])
-    db_sess.add(new_link)
-    db_sess.commit()
+
+    #db_sess.add(new_link)
+    #db_sess.commit()
+    db_sess["links"].insert_one(new_link.asdict())
+
     return 'ok'
 
 
 @app.route('/t/<string:name>')
 def beauty(name):
-    task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
+    #task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
+    task_id = db_sess["links"].find_one({"link": name})["task_id"]
     return get_task(task_id)
 
 
 if __name__ == '__main__':
-    db_session.global_init(r"data/db/tasks.db")
-    db_sess = db_session.create_session()
+    db = get_db()
+    db_sess = {"tasks": db["tasks"], "task_types": db["task_types"], "beautiful_links": db["beautiful_links"]}
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
