@@ -4,3 +4,4 @@ Flask~=1.1.2
 sympy~=1.8
 matplotlib
 pymongo
+dnspython
