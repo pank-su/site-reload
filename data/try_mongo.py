@@ -11,3 +11,4 @@ beautiful_links = db["beautiful_links"]
 
 c = tasks.find()
 print(len(c.distinct("id")))
+task_types.insert_many([{"id": 1, "subject_name": "phys", "name": "task_1"}, {"id": 2, "subject_name": "math", "name": "task_1"}])
