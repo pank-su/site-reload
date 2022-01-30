@@ -8,7 +8,8 @@ from flask import Flask, render_template, redirect, request, send_file
 from sympy import Poly, solve, oo
 from sympy.abc import x
 
-from data.tasks import Task
+from data.Task import Task
+from data.Link import Link
 
 from help_functions import get_db
 
@@ -443,24 +444,6 @@ def task_1():
                         '''
         result_dict['html'] = html
 
-'''
-        new_task = Task()
-        if db_sess.query(Task).first() is None:
-            new_task.id = 1
-        else:
-            new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
-        for el in db_sess.query(Task).filter(Task.type == 1):
-            if el.info == legs:
-                return redirect(f'/task/{el.id}')
-        new_task.info = legs
-        new_task.type = 1
-        with open(fr'static/files/{new_task.id}.json', 'w') as file:
-            file.write(json.dumps(result_dict))
-        new_task.solution_path = fr'static/files/{new_task.id}.json'
-        db_sess.add(new_task)
-        db_sess.commit()
-'''
-
         
 
         new_task = Task()
@@ -484,7 +467,6 @@ def task_1():
 
 @app.route('/task/<int:task_id>', methods=['GET'])
 def get_task(task_id):
-    #task = db_sess.query(Task).filter(Task.id == task_id).first()
     task = Task(db_sess["tasks"].find({"id": task_id}))
     if task.type == 1:
         legs = task.info
@@ -500,7 +482,6 @@ def get_task(task_id):
             param[-1]['name'] = f'{i + 1}V'
             param[-1]['content'] = str(legs[i][2])
 
-        #if len(db_sess.query(Link).filter(Link.task_id == task_id).all()) == 1:
         if len(db_sess["links"].find({"id": task_id}).distinct("id")) == 1:
             return render_template('first_task_solution.html',
                                    ran=list(range(1, len(legs) + 1)),
@@ -552,13 +533,10 @@ def add_url():
     if db_sess["links"].find_one() is None:
         new_link.id = 1
     else:
-        #new_link.id = db_sess.query(Link).order_by(Link.id.desc()).first().id + 1
         new_link.id = db_sess["links"].find_one().sort(["id", pymongo.DESCENDING])
 
     new_link.link, new_link.task_id = data.split('୪')[0], int(data.split('୪')[1])
 
-    #db_sess.add(new_link)
-    #db_sess.commit()
     db_sess["links"].insert_one(new_link.asdict())
 
     return 'ok'
@@ -566,7 +544,6 @@ def add_url():
 
 @app.route('/t/<string:name>')
 def beauty(name):
-    #task_id = db_sess.query(Link).filter(Link.link == name).first().task_id
     task_id = db_sess["links"].find_one({"link": name})["task_id"]
     return get_task(task_id)
 
