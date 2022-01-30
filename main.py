@@ -11,7 +11,7 @@ from sympy.abc import x
 from data.Task import Task
 from data.Link import Link
 
-from help_functions import get_db
+from data.help_functions import get_db
 
 
 
