@@ -309,7 +309,7 @@ def math_task_1():
         new_task.info = [str(f)]
         new_task.type = 2
 
-        _id =  db_sess.tasks.insert_one(new_task.asdict()).inserted_id
+        _id = db_sess.tasks.insert_one(new_task.asdict()).inserted_id
 
 
         result_dict = {'result': result}
@@ -503,7 +503,7 @@ def get_task(task_id):
                                elems=param, lines=len(legs), task_id=str(task_id), link='',
                                beauti='false')
     elif task.type == 2:
-        with open(f'static/files/{task_id}.json', 'r') as file:
+        with open(f'static/files/{str(task_id)}.json', 'r') as file:
             dict_ = json.loads(file.read())
         if len(db_sess.beautiful_links.find({"task_id": str(task_id)}).distinct("task_id")) == 1:
             return render_template('second_task_solution.html', line=task.info[0],
