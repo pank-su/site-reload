@@ -11,8 +11,8 @@ from sympy.abc import x
 from data.Task import Task
 from data.Link import Link
 
-from help_functions import get_db
-
+from data.help_functions import get_db
+from bson.objectid import ObjectId
 
 
 # Решение задачи MH методом и возврат значений токов
@@ -186,6 +186,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
 
+
 # функции вычисления экстремума
 def getDeepDotQuality(func, arg, val, n=3):
     dy = func.diff(arg)
@@ -300,31 +301,38 @@ def math_task_1():
         except Exception:
             result += '$$-$$\n'
         new_task = Task()
-        if db_sess.query(Task).first() is None:
-            new_task.id = 1
-        else:
-            new_task.id = db_sess.query(Task).order_by(Task.id.desc()).first().id + 1
-        for el in db_sess.query(Task).filter(Task.type == 2):
-            if el.info == [str(f)]:
-                return redirect(f'/task/{el.id}')
+
+        for el in db_sess.tasks.find({"type": 2}):
+            if el["info"] == [str(f)]:
+                return redirect(f'/task/{el["_id"]}')
+
         new_task.info = [str(f)]
         new_task.type = 2
+
+        _id =  db_sess.tasks.insert_one(new_task.asdict()).inserted_id
+
+
         result_dict = {'result': result}
-        with open(fr'static/files/{new_task.id}.json', 'w') as file:
+        with open(fr'static/files/{_id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
-        new_task.solution_path = fr'static/files/{new_task.id}.json'
+
+        new_task.solution_path = fr'static/files/{_id}.json'
+        res = db_sess.tasks.update_one({"_id": ObjectId(_id)}, {"$set":{"solution_path": new_task.solution_path}})
+        print(res)
+
         graph = sympy.plot(f, show=False, addaptive=False, xlim=(-11, 11), ylim=(-20, 25))
-        graph.save(f'static/images/{new_task.id}.png')
-        im = Image.open(f'static/images/{new_task.id}.png')
+        graph.save(f'static/images/{_id}.png')
+        im = Image.open(f'static/images/{_id}.png')
         im_2 = im.crop((20, 20, 600, 440))
-        im_2.save(f'static/images/{new_task.id}.png')
-        db_sess.add(new_task)
-        db_sess.commit()
-        return redirect(f'/task/{new_task.id}')
+        im_2.save(f'static/images/{_id}.png')
+
+        
+        
+        return redirect(f'/task/{_id}')
         # return render_template('second_task_solution.html', solution=result)
 
 
-@app.route('/get_image/<int:task_id>')
+@app.route('/get_image/<string:task_id>')
 def get_image(task_id):
     return send_file(f'static/images/{task_id}.png', mimetype='image/gif')
 
@@ -447,27 +455,27 @@ def task_1():
         
 
         new_task = Task()
-        # Запрос из db
-        for el in db_sess["tasks"].find({"type": "1"}):
+        for el in db_sess.tasks.find({"type": "1"}):
             if el["info"] == legs:
                 return redirect(f'/task/{el["id"]}')
 
         new_task.info = legs
         new_task.type = 1
-        with open(fr'static/files/{new_task.id}.json', 'w') as file:
+        _id = db_sess.tasks.insert_one(new_task.asdict()).inserted_id
+
+        with open(fr'static/files/{_id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
-        new_task.solution_path = fr'static/files/{new_task.id}.json'
+        new_task.solution_path = fr'static/files/{_id}.json'
+        res = db_sess.tasks.update_one({"_id": ObjectId(_id)}, {"$set":{"solution_path": new_task.solution_path}})
+        print(res)
 
-        db_sess["tasks"].insert_one(new_task.asdict())
-        
-
-
-        return redirect(f'/task/{new_task.id}')
+        return redirect(f'/task/{_id}')
 
 
-@app.route('/task/<int:task_id>', methods=['GET'])
+@app.route('/task/<string:task_id>', methods=['GET'])
 def get_task(task_id):
-    task = Task(db_sess["tasks"].find({"id": task_id}))
+    task_id = ObjectId(task_id)
+    task = Task(db_sess.tasks.find_one({"_id": task_id}))
     if task.type == 1:
         legs = task.info
         param = []
@@ -482,27 +490,28 @@ def get_task(task_id):
             param[-1]['name'] = f'{i + 1}V'
             param[-1]['content'] = str(legs[i][2])
 
-        if len(db_sess["links"].find({"id": task_id}).distinct("id")) == 1:
+        if len(db_sess.beautiful_links.find({"task_id": str(task_id)}).distinct("task_id")) == 1:
+            print(1)
             return render_template('first_task_solution.html',
                                    ran=list(range(1, len(legs) + 1)),
                                    elems=param, lines=len(legs), task_id=task_id,
-                                   link=db_sess["links"].find_one({"id": task_id})["link"],
+                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})["link"],
                                    beauti='true')
-
+        print(2)
         return render_template('first_task_solution.html',
                                ran=list(range(1, len(legs) + 1)),
-                               elems=param, lines=len(legs), task_id=task_id, link='',
+                               elems=param, lines=len(legs), task_id=str(task_id), link='',
                                beauti='false')
     elif task.type == 2:
         with open(f'static/files/{task_id}.json', 'r') as file:
             dict_ = json.loads(file.read())
-        if len(db_sess["links"].find({"id": task_id}).distinct("id")) == 1:
+        if len(db_sess.beautiful_links.find({"task_id": str(task_id)}).distinct("task_id")) == 1:
             return render_template('second_task_solution.html', line=task.info[0],
-                                   solution=dict_['result'], task_id=task_id, beauti='true',
-                                   link=db_sess["links"].find_one({"id": task_id})["link"])
+                                   solution=dict_['result'], task_id=str(task_id), beauti='true',
+                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})["link"])
 
         return render_template('second_task_solution.html', line=task.info[0],
-                               solution=dict_['result'], task_id=task_id, link='',
+                               solution=dict_['result'], task_id=str(task_id), link='',
                                beauti='false')
 
 
@@ -512,16 +521,18 @@ def lol():
     return render_template('menu.html')
 
 
-@app.route('/get_json_task/<int:task_id>')
+@app.route('/get_json_task/<string:task_id>')
 def get_json_task(task_id):
     with open(rf'static/files/{task_id}.json', 'r') as file:
+        print("Hey")
         return file.read()
 
 
 @app.route('/check_url', methods=['POST'])
 def check_url():
     link = request.data.decode('utf-8')
-    if len(db_sess["links"].find({"link": link}).distinct("link")) == 1:
+    print(link)
+    if len(db_sess.beautiful_links.find({"link": link}).distinct("link")) == 1:
         return 'False'
     return 'True'
 
@@ -530,26 +541,21 @@ def check_url():
 def add_url():
     data = request.data.decode('utf-8')
     new_link = Link()
-    if db_sess["links"].find_one() is None:
-        new_link.id = 1
-    else:
-        new_link.id = db_sess["links"].find_one().sort(["id", pymongo.DESCENDING])
 
-    new_link.link, new_link.task_id = data.split('୪')[0], int(data.split('୪')[1])
+    new_link.link, new_link.task_id = data.split('୪')[0], str(data.split('୪')[1])
 
-    db_sess["links"].insert_one(new_link.asdict())
+    db_sess.beautiful_links.insert_one(new_link.asdict())
 
     return 'ok'
 
 
 @app.route('/t/<string:name>')
 def beauty(name):
-    task_id = db_sess["links"].find_one({"link": name})["task_id"]
+    task_id = db_sess.beautiful_links.find_one({"link": name})["task_id"]
     return get_task(task_id)
 
 
 if __name__ == '__main__':
-    db = get_db()
-    db_sess = {"tasks": db["tasks"], "task_types": db["task_types"], "beautiful_links": db["beautiful_links"]}
+    db_sess = get_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
