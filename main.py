@@ -555,8 +555,6 @@ def beauty(name):
 
 
 if __name__ == '__main__':
-    if 'DYNO' in os.environ:  # only trigger SSLify if the app is running on Heroku
-        sslify = SSLify(app)
     db_sess = get_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
