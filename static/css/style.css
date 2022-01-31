@@ -13,4 +13,14 @@ input::-webkit-inner-spin-button {
 body{
     max-width: 570px;
     margin: auto;
+    background: rgba(255,255,255,0.7);
+    height: 100vh;
+    border-radius: 3%;
+}
+
+html{
+    background-image: url("../images/bg.png");
+    background-color: #cccccc;
+    background-position: center top;
+    background-size: 350%;
 }

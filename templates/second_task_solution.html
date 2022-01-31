@@ -77,7 +77,7 @@
     </div>
 </div>
 <div class="px-3 py-3">
-    <button type="button" class="btn btn-outline-info" onclick='document.location.replace("/")'>Вернутся на главный экран</button>
+    <button type="button" class="btn btn-light" onclick='document.location.replace("/")'>Вернутся на главный экран</button>
 </div>
 <footer class="py-2 d-flex justify-content-center" id='footer'>
     <a href="https://github.com/Cynep-SU">
@@ -93,7 +93,7 @@
     if (!navigator.share) {
         document.getElementById('share-button').innerText = 'Copy'
     }
-    var task_id = {{task_id}};
+    var task_id = "{{task_id}}";
     var bool = {{beauti}}
     const bad_url = document.getElementById("bad_url")
     const good_url = document.getElementById("good_url")
