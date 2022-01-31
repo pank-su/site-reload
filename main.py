@@ -5,6 +5,7 @@ import numpy as np
 import sympy
 from PIL import Image
 from flask import Flask, render_template, redirect, request, send_file
+from flask_sslify import SSLify
 from sympy import Poly, solve, oo
 from sympy.abc import x
 
@@ -186,7 +187,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ХАХАХАХХАХАХАХА ЭТО СЕКРЕТНЫЙ КЛЮЧ'
 
 
-
 # функции вычисления экстремума
 def getDeepDotQuality(func, arg, val, n=3):
     dy = func.diff(arg)
@@ -311,13 +311,13 @@ def math_task_1():
 
         _id = db_sess.tasks.insert_one(new_task.asdict()).inserted_id
 
-
         result_dict = {'result': result}
         with open(fr'static/files/{_id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
 
         new_task.solution_path = fr'static/files/{_id}.json'
-        res = db_sess.tasks.update_one({"_id": ObjectId(_id)}, {"$set":{"solution_path": new_task.solution_path}})
+        res = db_sess.tasks.update_one({"_id": ObjectId(_id)},
+                                       {"$set": {"solution_path": new_task.solution_path}})
         print(res)
 
         graph = sympy.plot(f, show=False, addaptive=False, xlim=(-11, 11), ylim=(-20, 25))
@@ -326,8 +326,6 @@ def math_task_1():
         im_2 = im.crop((20, 20, 600, 440))
         im_2.save(f'static/images/{_id}.png')
 
-        
-        
         return redirect(f'/task/{_id}')
         # return render_template('second_task_solution.html', solution=result)
 
@@ -452,8 +450,6 @@ def task_1():
                         '''
         result_dict['html'] = html
 
-        
-
         new_task = Task()
         for el in db_sess.tasks.find({"type": "1"}):
             if el["info"] == legs:
@@ -466,7 +462,8 @@ def task_1():
         with open(fr'static/files/{_id}.json', 'w') as file:
             file.write(json.dumps(result_dict))
         new_task.solution_path = fr'static/files/{_id}.json'
-        res = db_sess.tasks.update_one({"_id": ObjectId(_id)}, {"$set":{"solution_path": new_task.solution_path}})
+        res = db_sess.tasks.update_one({"_id": ObjectId(_id)},
+                                       {"$set": {"solution_path": new_task.solution_path}})
         print(res)
 
         return redirect(f'/task/{_id}')
@@ -495,7 +492,8 @@ def get_task(task_id):
             return render_template('first_task_solution.html',
                                    ran=list(range(1, len(legs) + 1)),
                                    elems=param, lines=len(legs), task_id=task_id,
-                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})["link"],
+                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})[
+                                       "link"],
                                    beauti='true')
         print(2)
         return render_template('first_task_solution.html',
@@ -508,7 +506,8 @@ def get_task(task_id):
         if len(db_sess.beautiful_links.find({"task_id": str(task_id)}).distinct("task_id")) == 1:
             return render_template('second_task_solution.html', line=task.info[0],
                                    solution=dict_['result'], task_id=str(task_id), beauti='true',
-                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})["link"])
+                                   link=db_sess.beautiful_links.find_one({"task_id": str(task_id)})[
+                                       "link"])
 
         return render_template('second_task_solution.html', line=task.info[0],
                                solution=dict_['result'], task_id=str(task_id), link='',
@@ -556,6 +555,8 @@ def beauty(name):
 
 
 if __name__ == '__main__':
+    if 'DYNO' in os.environ:  # only trigger SSLify if the app is running on Heroku
+        sslify = SSLify(app)
     db_sess = get_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)

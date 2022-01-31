@@ -10,4 +10,3 @@ beautiful_links = db["beautiful_links"]
 
 
 c = tasks.find_one({"_id": ObjectId("61f70f65c4ec2bcf79dbf2ac")})
-print(c)
